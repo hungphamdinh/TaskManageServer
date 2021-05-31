@@ -13,7 +13,12 @@ const addTask = async (req, res, next) => {
     const tasKData = await task.get();
     if (tasKData.exists) {
       const data = req.body;
-      await firestore.collection(TASKS).doc().set(data);
+      const uid = firestore.collection(TASKS).doc().id
+      console.log(uid);
+      await firestore.collection(TASKS).doc().set({
+        ...data,
+        id: uid,
+      });
       res.send("Record saved successfuly");
     } else {
       res.send([]);
@@ -33,7 +38,7 @@ const getAllTask = async (req, res, next) => {
     } else {
       data.forEach((doc) => {
         const task = new Task(
-          doc.id,
+          // doc.id,
           doc.data().name,
           doc.data().userId,
           doc.data().status,
@@ -52,13 +57,33 @@ const getAllTask = async (req, res, next) => {
 
 const getTasksByUserId = async (req, res, next) => {
   try {
-    const id = req.params.id;
-    const task = await firestore.collection(USERS).doc(id); // filerBy userId
-    const data = await task.get();
-    if (!data.exists) {
-      res.status(404).send("Task with the userID not found");
-    } else {
-      res.send(data.data());
+    const id = req.query.id;
+    console.log(id);
+    let array = [];
+    const userData = await firestore
+      .collection(TASKS)
+      .where("userId", "==", id)
+      .get()
+      .then((querySnapshot) => {
+        querySnapshot.forEach((doc) => {
+          console.log(doc.data());
+          const task = new Task(
+            doc.data().id,
+            doc.data().name,
+            doc.data().userId,
+            doc.data().status,
+            doc.data().timeCreated,
+            doc.data().members,
+            doc.data().description
+          );
+          array.push(task);
+          return doc;
+        });
+        res.send(array);
+        return querySnapshot;
+      }); // filerBy userId
+    if (!userData.exist) {
+      res.send("Wrong userId");
     }
   } catch (error) {
     res.status(400).send(error.message);
