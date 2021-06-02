@@ -2,18 +2,22 @@
 
 const firebase = require("../db");
 const User = require("../models/user");
+const Member = require("../models/member");
+
 const firestore = firebase.firestore();
 const USERS = "users";
+const MEMBER = "members";
+
 const login = async (req, res, next) => {
   try {
     const { body } = req;
     const mail = body.mail;
     let array = [];
-    const userData = await firestore
+    await firestore
       .collection(USERS)
       .where("mail", "==", mail)
       .get()
-      .then((querySnapshot) => {
+      .then(async (querySnapshot) => {
         querySnapshot.forEach((doc) => {
           const user = new User(
             doc.id,
@@ -26,22 +30,27 @@ const login = async (req, res, next) => {
           array.push(user);
           return doc;
         });
-        res.send(array[0]);
-        return querySnapshot;
+        if (querySnapshot.empty) {
+          await firestore
+            .collection(USERS)
+            .doc()
+            .set({
+              name: body.name,
+              mail: body.mail,
+              role: body.role,
+              profile: body.profile ? body.profile : body.name[0],
+              googleUserId: body.userId ? body.userId : "",
+              members: body.members ? body.members : [],
+            });
+          res.send({
+            message: "Register Success",
+          });
+        } else {
+          res.send(array[0]);
+        }
+
+        return array;
       }); // filerBy userId
-    if (!userData.exist) {
-      await firestore
-        .collection(USERS)
-        .doc()
-        .set({
-          name: body.name,
-          mail: body.mail,
-          role: body.role,
-          profile: body.profile ? body.profile : body.name[0],
-          googleUserId: body.userId ? body.userId : "",
-        });
-      res.send("Register success");
-    }
   } catch (error) {
     res.status(400).send(error.message);
   }
@@ -119,6 +128,40 @@ const deleteUser = async (req, res, next) => {
   }
 };
 
+const addNewMember = async (req, res, next) => {
+  try {
+    const id = req.body.memberId;
+    await firestore.collection(MEMBER).doc(id).set(req.body)
+    res.send("Record saved successfuly");
+  } catch (error) {
+    res.status(400).send(error.message);
+  }
+};
+
+const getMembersByUserID = async (req, res, next) => {
+  try {
+    const id = req.query.userId;
+    console.log(req.query);
+    let array = [];
+    const userData = await firestore
+      .collection(MEMBER)
+      .where("userId", "==", id)
+      .get()
+      .then((querySnapshot) => {
+        querySnapshot.forEach((doc) => {
+          array.push(doc.data());
+          return doc;
+        });
+        res.send(array);
+        return querySnapshot;
+      }); // filerBy userId
+    if (!userData.exist) {
+      res.send("Wrong userId");
+    }
+  } catch (error) {
+    res.status(400).send(error.message);
+  }
+};
 module.exports = {
   addUser,
   getAllUsers,
@@ -126,4 +169,6 @@ module.exports = {
   updateUser,
   deleteUser,
   login,
+  addNewMember,
+  getMembersByUserID,
 };

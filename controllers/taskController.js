@@ -14,8 +14,7 @@ const addTask = async (req, res, next) => {
     if (tasKData.exists) {
       const data = req.body;
       const uid = firestore.collection(TASKS).doc().id
-      console.log(uid);
-      await firestore.collection(TASKS).doc().set({
+      await firestore.collection(TASKS).doc(uid).set({
         ...data,
         id: uid,
       });
@@ -73,6 +72,8 @@ const getTasksByUserId = async (req, res, next) => {
             doc.data().userId,
             doc.data().status,
             doc.data().timeCreated,
+            doc.data().timeStart,
+            doc.data().timeEnd,
             doc.data().members,
             doc.data().description
           );
