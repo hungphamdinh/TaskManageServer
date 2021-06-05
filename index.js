@@ -6,6 +6,7 @@ const config = require('./config');
 const studentRoutes = require('./routes/student-routes');
 const userRoutes = require('./routes/user-routes');
 const taskRoutes = require('./routes/task-routes');
+const subTaskRoutes = require('./routes/subTask-routes');
 
 const app = express();
 
@@ -16,6 +17,7 @@ app.use(bodyParser.json());
 app.use('/api', studentRoutes.routes);
 app.use('/api', userRoutes.routes);
 app.use('/api', taskRoutes.routes);
+app.use('/api', subTaskRoutes.routes);
 
 
 
