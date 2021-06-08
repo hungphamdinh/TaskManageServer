@@ -1,14 +1,20 @@
 class Comment {
   constructor(
     id,
-    name,
+    message,
     taskId,
     timeCreated,
+    image,
+    file,
+    user,
   ) {
     this.id = id;
-    this.name = name;
+    this.message = message;
     this.taskId = taskId;
     this.timeCreated = timeCreated;
+    this.image = image,
+    this.file = file
+    this.user = user
   }
 }
 
