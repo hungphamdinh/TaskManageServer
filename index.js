@@ -1,12 +1,12 @@
 const express = require('express');
-const cors = require('cors');
-const bodyParser = require('body-parser');
-const config = require('./config');
-const studentRoutes = require('./routes/student-routes');
-const userRoutes = require('./routes/user-routes');
-const taskRoutes = require('./routes/task-routes');
-const subTaskRoutes = require('./routes/subTask-routes');
-const commentRoute = require('./routes/comment-route');
+// const cors = require('cors');
+// const bodyParser = require('body-parser');
+// const config = require('./config');
+// const studentRoutes = require('./routes/student-routes');
+// const userRoutes = require('./routes/user-routes');
+// const taskRoutes = require('./routes/task-routes');
+// const subTaskRoutes = require('./routes/subTask-routes');
+// const commentRoute = require('./routes/comment-route');
 const app = express();
 const PORT = process.env.PORT || 8080
 
