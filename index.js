@@ -8,7 +8,7 @@ const taskRoutes = require('./routes/task-routes');
 const subTaskRoutes = require('./routes/subTask-routes');
 const commentRoute = require('./routes/comment-route');
 const app = express();
-
+const PORT = process.env.PORT || 8080
 
 
 app.use(express.json());
@@ -23,4 +23,5 @@ app.use('/api', commentRoute.routes);
 
 
 
-app.listen(config.port, () => console.log('App is listening on url http://localhost:' + config.port));
+// app.listen(config.port, () => console.log('App is listening on url http://localhost:' + config.port));
+app.listen(PORT, () => console.log('Listen at port ' + PORT));
