@@ -16,6 +16,7 @@ const sendInvitation = async (req, res, next) => {
       .set({
         ...data,
         id: uid,
+        status: 0,
       });
     res.send({
       status: 200,
@@ -33,7 +34,7 @@ const getInvitationsByUserId = async (req, res, next) => {
   try {
     const id = req.params.id;
     const type = req.params.type;
-    if (type === 0) {
+    if (type === 0) { //0: Receiver; 1: Sender
       const invitation = await firestore
         .collection(INVITATION)
         .where("receiverId", "==", id)
@@ -122,7 +123,7 @@ const acceptInvitation = async (req, res, next) => {
 const deleteInvitation = async (req, res, next) => {
   try {
     const userId = req.params.userId;
-    const id = req.params.userId;
+    const id = req.params.id;
     const invitation = await firestore
       .collection(INVITATION)
       .where("userId", "==", userId);
