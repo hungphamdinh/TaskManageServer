@@ -24,7 +24,7 @@ const addTask = async (req, res, next) => {
         .collection(TASKS)
         .doc(uid)
         .set({
-          ...data,//name, userId, timeCreated, timeStart, timeEnd
+          ...data, //name, userId, timeCreated, timeStart, timeEnd
           id: uid,
         });
       res.send("Record saved successfuly");
@@ -181,7 +181,12 @@ const updateTask = async (req, res, next) => {
     const id = req.params.id;
     const data = req.body;
     const task = await firestore.collection(TASKS).doc(id);
-    await task.update(data);
+    await task.update({
+      name: data.name,
+      status: data.status,
+      members: data.members,
+      description: data.description,
+    });
     res.send("Task record updated successfuly");
   } catch (error) {
     res.status(400).send(error.message);
