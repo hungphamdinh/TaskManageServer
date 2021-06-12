@@ -178,7 +178,7 @@ const getTasksByUserId = async (req, res, next) => {
 
 const updateTask = async (req, res, next) => {
   try {
-    const id = req.params.id;
+    const id = req.body.id;
     const data = req.body;
     const task = await firestore.collection(TASKS).doc(id);
     await task.update({
@@ -187,9 +187,15 @@ const updateTask = async (req, res, next) => {
       members: data.members,
       description: data.description,
     });
-    res.send("Task record updated successfuly");
+    res.send({
+      status: 200,
+      message: "Record save successfully",
+    });
   } catch (error) {
-    res.status(400).send(error.message);
+    res.status(400).send({
+      status: 400,
+      message: error.message,
+    });
   }
 };
 

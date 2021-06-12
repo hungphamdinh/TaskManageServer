@@ -13,7 +13,7 @@ router.post('/task', addTask);
 router.get('/tasks', getAllTask);
 router.get('/tasks/getTasksById', getTasksByUserId);
 router.get('/task/getDetail', getDetailTaskById);
-router.put('/task/:id', updateTask);
+router.put('/task/update', updateTask);
 router.delete('/task/:id', deleteTask);
 
 
