@@ -82,7 +82,7 @@ const updateSubTask = async (req, res, next) => {
       });
       res.send({
         id,
-        status: status.active,
+        status: status,
       });
     }
     else {

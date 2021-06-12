@@ -181,6 +181,7 @@ const updateTask = async (req, res, next) => {
     const id = req.body.id;
     const data = req.body;
     const task = await firestore.collection(TASKS).doc(id);
+    const dataTask = await task.get();
     await task.update({
       name: data.name,
       status: data.status,
