@@ -7,6 +7,7 @@ const userRoutes = require('./routes/user-routes');
 const taskRoutes = require('./routes/task-routes');
 const subTaskRoutes = require('./routes/subTask-routes');
 const commentRoute = require('./routes/comment-route');
+const invitationRoute = require('./routes/invitation-route');
 const app = express();
 const PORT = process.env.PORT || 8080
 
@@ -20,6 +21,7 @@ app.use('/api', userRoutes.routes);
 app.use('/api', taskRoutes.routes);
 app.use('/api', subTaskRoutes.routes);
 app.use('/api', commentRoute.routes);
+app.use('/api', invitationRoute.routes);
 
 app.get("/", (req, res) => {
     res.send('Hêlo');

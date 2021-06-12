@@ -68,8 +68,6 @@ const getDetailTaskById = async (req, res, next) => {
     const id = req.query.id;
     const userId = req.query.userId;
     let task = {};
-    let subTasks = [];
-    let comments = [];
     const userData = await firestore
       .collection(TASKS)
       .where("id", "==", id)
@@ -93,43 +91,6 @@ const getDetailTaskById = async (req, res, next) => {
         });
         return querySnapshot;
       });
-    // const taskData = await firestore
-    //   .collection(SUBTASKS)
-    //   .where("parentId", "==", id)
-    //   .get()
-    //   .then((querySnapshot) => {
-    //     querySnapshot.forEach((doc) => {
-    //       const subTask = new SubTask(
-    //         doc.data().id,
-    //         doc.data().name,
-    //         doc.data().parentId,
-    //         doc.data().timeCreated,
-    //         doc.data().status
-    //       );
-    //       subTasks.push(subTask);
-    //       return doc;
-    //     });
-    //     return querySnapshot;
-    //   });
-    // const commentData = await firestore
-    //   .collection(COMMENT)
-    //   .where("taskId", "==", id)
-    //   .get()
-    //   .then((querySnapshot) => {
-    //     querySnapshot.forEach((doc) => {
-    //       const comment = new Comment(
-    //         doc.data().id,
-    //         doc.data().name,
-    //         doc.data().taskId,
-    //         doc.data().timeCreated
-    //       );
-    //       comments.push(subTask);
-    //       return doc;
-    //     });
-    //     return querySnapshot;
-    //   });
-    // task.subTasks = subTasks;
-    // task.comments = comments;
     res.send(task);
     if (!userData.exist) {
       res.send("Wrong taskId");
