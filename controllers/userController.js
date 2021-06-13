@@ -74,15 +74,7 @@ const getAllUsers = async (req, res, next) => {
       res.status(404).send("No student record found");
     } else {
       data.forEach((doc) => {
-        const user = new User(
-          doc.id,
-          doc.data().googleUserId,
-          doc.data().name,
-          doc.data().mail,
-          doc.data().role,
-          doc.data().profile
-        );
-        userArray.push(user);
+        userArray.push(doc.data());
       });
       res.send(userArray);
     }
