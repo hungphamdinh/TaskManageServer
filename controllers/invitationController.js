@@ -9,15 +9,22 @@ const INVITATION = "invitations";
 const sendInvitation = async (req, res, next) => {
   try {
     const data = req.body;
-    const uid = firestore.collection(INVITATION).doc().id;
-    await firestore
-      .collection(INVITATION)
-      .doc(uid)
-      .set({
-        ...data,
-        id: uid,
-        status: 0,
+    const batch = db.batch();
+    data.forEach((doc) => {
+      var docRef = db.collection(INVITATION).doc(); //automatically generate unique id
+      batch.set(docRef, {
+        ...doc,
+        id: doc.id
       });
+    })
+    // await firestore
+    //   .collection(INVITATION)
+    //   .doc(uid)
+    //   .set({
+    //     ...data,
+    //     id: uid,
+    //     status: 0,
+    //   });
     res.send({
       status: 200,
       message: "Record save successfully",
