@@ -11,13 +11,16 @@ const sendInvitation = async (req, res, next) => {
     const data = req.body;
     const batch = firestore.batch();
     data.forEach((doc) => {
-      var docRef = firestore.collection(INVITATION).doc(); //automatically generate unique id
+      console.log(doc);
+      var docRef = firestore.collection(INVITATION).doc();
+      var uid = firestore.collection(INVITATION).doc().id;
       batch.set(docRef, {
         ...doc,
-        id: doc.id,
+        id: uid,
         content: `You have one invitation from ${doc.userName}`
       });
     })
+    batch.commit();
     // await firestore
     //   .collection(INVITATION)
     //   .doc(uid)
