@@ -67,7 +67,7 @@ const addUser = async (req, res, next) => {
 
 const getAllUsers = async (req, res, next) => {
   try {
-    const id = req.quey.id;
+    const id = req.query.id;
     const users = await firestore.collection(USERS);
     const data = await users.get();
     const userArray = [];
