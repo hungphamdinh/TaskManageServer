@@ -57,7 +57,8 @@ const getInvitationsByUserId = async (req, res, next) => {
         .get()
         .then((querySnapshot) => {
           querySnapshot.forEach((doc) => {
-            if ((doc.data().status = status.pending)) {
+            console.log(doc.data().status)
+            if ((doc.data().status == status.pending)) {
               //Status pending
               array.push(doc.data());
             }
