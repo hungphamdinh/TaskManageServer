@@ -32,9 +32,12 @@ const sendInvitation = async (req, res, next) => {
 
 const getInvitationsByUserId = async (req, res, next) => {
   try {
-    const id = req.params.id;
-    const type = req.params.type;
-    if (type === 0) { //0: Receiver; 1: Sender
+    let array = [];
+    const id = req.query.id;
+    const type = req.query.type;
+    console.log(type)
+    if (type == 0) { //0: Receiver; 1: Sender
+      console.log('abc')
       const invitation = await firestore
         .collection(INVITATION)
         .where("receiverId", "==", id)
@@ -47,7 +50,11 @@ const getInvitationsByUserId = async (req, res, next) => {
             }
             return doc;
           });
-          res.send(array);
+          res.send({
+            status: 200,
+            message: "Success",
+            data: array
+          });
           return querySnapshot;
         });
       if (!invitation.exists) {
@@ -57,7 +64,7 @@ const getInvitationsByUserId = async (req, res, next) => {
           data: [],
         });
       }
-    } else if (type === 1) {
+    } else if (type == 1) {
       const invitation = await firestore
         .collection(INVITATION)
         .where("userId", "==", id)
