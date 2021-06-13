@@ -1,11 +1,11 @@
 class Invitation {
-  constructor(id, content, title, taskId, userId, receiverId, status) {
+  constructor(id, content, taskId, userId, receiverId, status, userName) {
     this.id = id;
     this.content = content;
-    this.title = title;
     this.taskId = taskId;
     this.userId = userId;
     this.receiverId = receiverId;
+    this.userName = userName;
     this.status = status; //0: pending, 1: accepted
   }
 }

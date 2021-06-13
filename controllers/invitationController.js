@@ -5,12 +5,13 @@ const Invitation = require("../models/invitation");
 
 const firestore = firebase.firestore();
 const INVITATION = "invitations";
-const USER = 'users';
+const USER = "users";
+const MEMBER = 'members';
 const status = {
   pending: 0,
   accepted: 1,
   rejected: 2,
-}
+};
 const sendInvitation = async (req, res, next) => {
   try {
     const data = req.body;
@@ -18,14 +19,13 @@ const sendInvitation = async (req, res, next) => {
     data.forEach((doc) => {
       console.log(doc);
       var docRef = firestore.collection(INVITATION).doc();
-      var uid = firestore.collection(INVITATION).doc().id;
       batch.set(docRef, {
         ...doc,
-        id: uid,
+        id: docRef.id,
         status: status.pending, //pending
-        content: `You have one invitation from ${doc.userName}`
+        content: `You have one invitation from ${doc.userName}`,
       });
-    })
+    });
     batch.commit();
     // await firestore
     //   .collection(INVITATION)
@@ -52,15 +52,16 @@ const getInvitationsByUserId = async (req, res, next) => {
     let array = [];
     const id = req.query.id;
     const type = req.query.type;
-    if (type == 0) { //0: Receiver; 1: Sender
+    if (type == 0) {
+      //0: Receiver; 1: Sender
       const invitation = await firestore
         .collection(INVITATION)
         .where("receiverId", "==", id)
         .get()
         .then((querySnapshot) => {
           querySnapshot.forEach((doc) => {
-            console.log(doc.data().status)
-            if ((doc.data().status == status.pending)) {
+            console.log(doc.data().status);
+            if (doc.data().status == status.pending) {
               //Status pending
               array.push(doc.data());
             }
@@ -69,8 +70,8 @@ const getInvitationsByUserId = async (req, res, next) => {
           res.send({
             status: 200,
             message: "Success",
-            type: 'Receiver',
-            data: array
+            type: "Receiver",
+            data: array,
           });
           return querySnapshot;
         });
@@ -94,8 +95,8 @@ const getInvitationsByUserId = async (req, res, next) => {
           res.send({
             status: 200,
             message: "Success",
-            type: 'Sender',
-            data: array
+            type: "Sender",
+            data: array,
           });
           return querySnapshot;
         });
@@ -126,11 +127,30 @@ const acceptInvitation = async (req, res, next) => {
   try {
     const id = req.body.id;
     const userId = req.body.userId;
+    // const invitation = await firestore
+    //   .collection(INVITATION)
+    //   .where("receiverId", "==", userId)
+    //   .get();
+    let haveData = false;
     const invitation = await firestore
       .collection(INVITATION)
-      .where("receiverId", "==", userId);
-    if (invitation.exists) {
-      // Update Invitation
+      .where("receiverId", "==", userId)
+      .get()
+      .then(async (querySnapshot) => {
+        querySnapshot.forEach((doc) => {
+          if (doc.exists) {
+            haveData = true;
+          } else {
+            haveData = false;
+          }
+          return doc;
+        });
+
+        return querySnapshot;
+      });
+    // Update Invitation
+    if (haveData) {
+      console.log(id);
       const statusData = await firestore.collection(INVITATION).doc(id);
       await statusData.update({
         status: status.accepted,
