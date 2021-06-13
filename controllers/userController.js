@@ -67,6 +67,7 @@ const addUser = async (req, res, next) => {
 
 const getAllUsers = async (req, res, next) => {
   try {
+    const id = req.quey.id;
     const users = await firestore.collection(USERS);
     const data = await users.get();
     const userArray = [];
@@ -74,7 +75,9 @@ const getAllUsers = async (req, res, next) => {
       res.status(404).send("No student record found");
     } else {
       data.forEach((doc) => {
-        userArray.push(doc.data());
+        if (id !== doc.data().id) {
+          userArray.push(doc.data());
+        }
       });
       res.send(userArray);
     }
@@ -123,7 +126,7 @@ const deleteUser = async (req, res, next) => {
 const addNewMember = async (req, res, next) => {
   try {
     const id = req.body.memberId;
-    await firestore.collection(MEMBER).doc(id).set(req.body)
+    await firestore.collection(MEMBER).doc(id).set(req.body);
     res.send("Record saved successfuly");
   } catch (error) {
     res.status(400).send(error.message);
