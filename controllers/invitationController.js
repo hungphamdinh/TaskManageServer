@@ -5,7 +5,10 @@ const Invitation = require("../models/invitation");
 
 const firestore = firebase.firestore();
 const INVITATION = "invitations";
-
+const status = {
+  pending: 0,
+  accepted: 1,
+}
 const sendInvitation = async (req, res, next) => {
   try {
     const data = req.body;
@@ -17,6 +20,7 @@ const sendInvitation = async (req, res, next) => {
       batch.set(docRef, {
         ...doc,
         id: uid,
+        status: status.pending, //pending
         content: `You have one invitation from ${doc.userName}`
       });
     })
@@ -46,16 +50,14 @@ const getInvitationsByUserId = async (req, res, next) => {
     let array = [];
     const id = req.query.id;
     const type = req.query.type;
-    console.log(type)
     if (type == 0) { //0: Receiver; 1: Sender
-      console.log('abc')
       const invitation = await firestore
         .collection(INVITATION)
         .where("receiverId", "==", id)
         .get()
         .then((querySnapshot) => {
           querySnapshot.forEach((doc) => {
-            if ((doc.data().status = 0)) {
+            if ((doc.data().status = status.pending)) {
               //Status pending
               array.push(doc.data());
             }
@@ -64,6 +66,7 @@ const getInvitationsByUserId = async (req, res, next) => {
           res.send({
             status: 200,
             message: "Success",
+            type: 'Receiver',
             data: array
           });
           return querySnapshot;
@@ -85,7 +88,12 @@ const getInvitationsByUserId = async (req, res, next) => {
             array.push(doc.data());
             return doc;
           });
-          res.send(array);
+          res.send({
+            status: 200,
+            message: "Success",
+            type: 'Sender',
+            data: array
+          });
           return querySnapshot;
         });
       if (!invitation.exists) {
@@ -119,9 +127,9 @@ const acceptInvitation = async (req, res, next) => {
       .collection(INVITATION)
       .where("receiverId", "==", userId);
     if (invitation.exists) {
-      const status = await firestore.collection(INVITATION).doc(id);
-      await status.update({
-        status: 1,
+      const statusData = await firestore.collection(INVITATION).doc(id);
+      await statusData.update({
+        status: status.accepted,
       });
       res.send({
         status: 200,
