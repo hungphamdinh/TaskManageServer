@@ -5,9 +5,11 @@ const Invitation = require("../models/invitation");
 
 const firestore = firebase.firestore();
 const INVITATION = "invitations";
+const USER = 'users';
 const status = {
   pending: 0,
   accepted: 1,
+  rejected: 2,
 }
 const sendInvitation = async (req, res, next) => {
   try {
@@ -128,10 +130,15 @@ const acceptInvitation = async (req, res, next) => {
       .collection(INVITATION)
       .where("receiverId", "==", userId);
     if (invitation.exists) {
+      // Update Invitation
       const statusData = await firestore.collection(INVITATION).doc(id);
       await statusData.update({
         status: status.accepted,
       });
+      //ADd new member
+      const user = await firestore.collection(USER).doc(userId);
+      const userData = await user.get();
+      await firestore.collection(MEMBER).doc(userId).set(userData.data());
       res.send({
         status: 200,
         message: "Success",
