@@ -156,6 +156,8 @@ const acceptInvitation = async (req, res, next) => {
       await statusData.update({
         status: status.accepted,
       });
+      //Get ParentId from Invitation
+      const invitationData = await statusData.get();
       //ADd new member
       const user = await firestore.collection(USER).doc(userId);
       const userData = await user.get();
@@ -166,9 +168,17 @@ const acceptInvitation = async (req, res, next) => {
         userData.data().mail, 
         userData.data().role, 
         userData.data().profile, 
-        userId
+        invitationData.data().userId,//parentId
       )
-      await firestore.collection(MEMBER).doc(userId).set(member);
+      await firestore.collection(MEMBER).doc(userId).set({
+        memberId: member.memberId, 
+        googleUserId: member.googleUserId,
+        name: member.name,
+        mail: member.mail, 
+        role: member.role, 
+        profile: member.profile,
+        userId: member.userId,
+      });
       res.send({
         status: 200,
         message: "Success",
