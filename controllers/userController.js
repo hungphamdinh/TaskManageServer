@@ -75,8 +75,16 @@ const getAllUsers = async (req, res, next) => {
       res.status(404).send("No student record found");
     } else {
       data.forEach((doc) => {
-        if (id !== doc.data().id) {
-          userArray.push(doc.data());
+        if (id !== doc.id) {
+          const user = new User(
+            doc.id,
+            doc.data().googleUserId,
+            doc.data().name,
+            doc.data().mail,
+            doc.data().role,
+            doc.data().profile
+          );
+          userArray.push(user);
         }
       });
       res.send(userArray);
@@ -88,6 +96,7 @@ const getAllUsers = async (req, res, next) => {
 
 const getUser = async (req, res, next) => {
   try {
+    
     const id = req.params.id;
     const user = await firestore.collection(USERS).doc(id);
     const data = await user.get();
