@@ -9,9 +9,9 @@ const INVITATION = "invitations";
 const sendInvitation = async (req, res, next) => {
   try {
     const data = req.body;
-    const batch = db.batch();
+    const batch = firestore.batch();
     data.forEach((doc) => {
-      var docRef = db.collection(INVITATION).doc(); //automatically generate unique id
+      var docRef = firestore.collection(INVITATION).doc(); //automatically generate unique id
       batch.set(docRef, {
         ...doc,
         id: doc.id,
