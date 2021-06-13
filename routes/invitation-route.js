@@ -9,8 +9,8 @@ const {
 const router = express.Router();
 
 router.get("/invitation/getByUserId", getInvitationsByUserId);
-router.get("/invitation/accept", acceptInvitation);
-router.put("/invitation/send", sendInvitation);
+router.put("/invitation/accept", acceptInvitation);
+router.post("/invitation/send", sendInvitation);
 router.delete("/invitation/delete", deleteInvitation);
 
 module.exports = {
