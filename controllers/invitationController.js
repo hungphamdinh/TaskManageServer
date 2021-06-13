@@ -2,6 +2,7 @@
 
 const firebase = require("../db");
 const Invitation = require("../models/invitation");
+const Member = require("../models/member");
 
 const firestore = firebase.firestore();
 const INVITATION = "invitations";
@@ -158,7 +159,16 @@ const acceptInvitation = async (req, res, next) => {
       //ADd new member
       const user = await firestore.collection(USER).doc(userId);
       const userData = await user.get();
-      await firestore.collection(MEMBER).doc(userId).set(userData.data());
+      const member = new Member(
+        userId,
+        userData.data().googleUserId, 
+        userData.data().name, 
+        userData.data().mail, 
+        userData.data().role, 
+        userData.data().profile, 
+        userId
+      )
+      await firestore.collection(MEMBER).doc(userId).set(member);
       res.send({
         status: 200,
         message: "Success",
