@@ -10,7 +10,7 @@ const TASKS = "tasks";
 const SUBTASKS = "subTasks";
 const COMMENT = "comment";
 const MEMBER = "members";
-
+const moment = require('moment');
 const USERS = "users";
 
 const addTask = async (req, res, next) => {
@@ -27,7 +27,7 @@ const addTask = async (req, res, next) => {
         .set({
           ...data, //name, userId, timeCreated, timeStart, timeEnd
           id: uid,
-          timeCreated: new Date()
+          timeCreated: moment(new Date()).format(),
         });
       res.send("Record saved successfuly");
     } else {
@@ -55,7 +55,7 @@ const getAllTask = async (req, res, next) => {
           doc.data().timeCreated,
           doc.data().members,
           doc.data().description,
-          doc.data().currentTime,
+          doc.data().currentTime
         );
         tasksArray.push(task);
       });
@@ -89,7 +89,7 @@ const getDetailTaskById = async (req, res, next) => {
             data.members,
             data.description,
             userId === data.userId ? true : false,
-            data.date,
+            data.date
           );
           return doc;
         });
@@ -107,6 +107,7 @@ const getDetailTaskById = async (req, res, next) => {
 const getTasksByUserId = async (req, res, next) => {
   try {
     const id = req.query.id;
+    const type = req.query.type;
     let array = [];
     const userData = await firestore
       .collection(TASKS)
@@ -164,7 +165,12 @@ const getTasksByUserId = async (req, res, next) => {
           return querySnapshot;
         });
     }
-
+    if (type === 0 || !type) {
+      array.sort(function (a, b) {
+        console.log(a);
+        return a.timeCreated.getTime() - b.timeCreated.getTime();
+      });
+    }
     res.send({
       message: "Success",
       status: 200,
