@@ -12,6 +12,7 @@ class TaskDetail {
     isAdmin,
     comments,
     subTasks,
+    date,
   ) {
     this.id = id;
     this.name = name;
@@ -25,7 +26,7 @@ class TaskDetail {
     this.isAdmin = isAdmin;
     this.comments = comments;
     this.subTasks = subTasks;
-
+    this.date = date;
   }
 }
 

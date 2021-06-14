@@ -9,6 +9,7 @@ const firestore = firebase.firestore();
 const TASKS = "tasks";
 const SUBTASKS = "subTasks";
 const COMMENT = "comment";
+const MEMBER = "members";
 
 const USERS = "users";
 
@@ -26,6 +27,7 @@ const addTask = async (req, res, next) => {
         .set({
           ...data, //name, userId, timeCreated, timeStart, timeEnd
           id: uid,
+          timeCreated: new Date()
         });
       res.send("Record saved successfuly");
     } else {
@@ -52,7 +54,8 @@ const getAllTask = async (req, res, next) => {
           doc.data().status,
           doc.data().timeCreated,
           doc.data().members,
-          doc.data().description
+          doc.data().description,
+          doc.data().currentTime,
         );
         tasksArray.push(task);
       });
@@ -85,7 +88,8 @@ const getDetailTaskById = async (req, res, next) => {
             data.timeEnd,
             data.members,
             data.description,
-            userId === data.userId ? true : false
+            userId === data.userId ? true : false,
+            data.date,
           );
           return doc;
         });
@@ -103,7 +107,6 @@ const getDetailTaskById = async (req, res, next) => {
 const getTasksByUserId = async (req, res, next) => {
   try {
     const id = req.query.id;
-    console.log(id);
     let array = [];
     const userData = await firestore
       .collection(TASKS)
@@ -111,7 +114,6 @@ const getTasksByUserId = async (req, res, next) => {
       .get()
       .then((querySnapshot) => {
         querySnapshot.forEach((doc) => {
-          console.log(doc.data());
           const task = new Task(
             doc.data().id,
             doc.data().name,
@@ -121,14 +123,53 @@ const getTasksByUserId = async (req, res, next) => {
             doc.data().timeStart,
             doc.data().timeEnd,
             doc.data().members,
-            doc.data().description
+            doc.data().description,
+            doc.data().date
           );
           array.push(task);
           return doc;
         });
-        res.send(array);
         return querySnapshot;
       }); // filerBy userId
+    const parentUser = await firestore.collection(MEMBER).doc(id).get();
+    if (parentUser.exists) {
+      const userId = parentUser.data().userId;
+      await firestore
+        .collection(TASKS)
+        .where("userId", "==", userId)
+        .get()
+        .then((querySnapshot) => {
+          querySnapshot.forEach((doc) => {
+            doc.data().members.forEach((item) => {
+              if (item.memberId === id) {
+                // console.log('abc');
+                const task = new Task(
+                  doc.data().id,
+                  doc.data().name,
+                  doc.data().userId,
+                  doc.data().status,
+                  doc.data().timeCreated,
+                  doc.data().timeStart,
+                  doc.data().timeEnd,
+                  doc.data().members,
+                  doc.data().description,
+                  doc.data().date
+                );
+                array.push(task);
+              }
+            });
+
+            return doc;
+          });
+          return querySnapshot;
+        });
+    }
+
+    res.send({
+      message: "Success",
+      status: 200,
+      data: array,
+    });
     if (!userData.exist) {
       res.send("Wrong userId");
     }

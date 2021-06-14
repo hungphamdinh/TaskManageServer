@@ -8,7 +8,8 @@ class Task {
     timeStart,
     timeEnd,
     members,
-    description
+    description,
+    date,
   ) {
     this.id = id;
     this.name = name;
@@ -19,6 +20,7 @@ class Task {
     this.timeEnd = timeEnd;
     this.members = members;
     this.description = description;
+    this.date = date;
   }
 }
 

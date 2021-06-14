@@ -7,7 +7,8 @@ const Member = require("../models/member");
 const firestore = firebase.firestore();
 const INVITATION = "invitations";
 const USER = "users";
-const MEMBER = 'members';
+const MEMBER = "members";
+const TASK = "tasks";
 const status = {
   pending: 0,
   accepted: 1,
@@ -127,13 +128,14 @@ const getInvitationsByUserId = async (req, res, next) => {
 const acceptInvitation = async (req, res, next) => {
   try {
     const id = req.body.id;
+    const taskId = req.body.taskId;
     const userId = req.body.userId;
     // const invitation = await firestore
     //   .collection(INVITATION)
     //   .where("receiverId", "==", userId)
     //   .get();
     let haveData = false;
-    const invitation = await firestore
+    await firestore
       .collection(INVITATION)
       .where("receiverId", "==", userId)
       .get()
@@ -163,22 +165,37 @@ const acceptInvitation = async (req, res, next) => {
       const userData = await user.get();
       const member = new Member(
         userId,
-        userData.data().googleUserId, 
-        userData.data().name, 
-        userData.data().mail, 
-        userData.data().role, 
-        userData.data().profile, 
-        invitationData.data().userId,//parentId
-      )
+        userData.data().googleUserId,
+        userData.data().name,
+        userData.data().mail,
+        userData.data().role,
+        userData.data().profile,
+        invitationData.data().userId //parentId
+      );
       await firestore.collection(MEMBER).doc(userId).set({
-        memberId: member.memberId, 
+        memberId: member.memberId,
         googleUserId: member.googleUserId,
         name: member.name,
-        mail: member.mail, 
-        role: member.role, 
+        mail: member.mail,
+        role: member.role,
         profile: member.profile,
         userId: member.userId,
       });
+      const task = await firestore.collection(TASK).doc(taskId).get();
+      await firestore
+        .collection(TASK)
+        .doc(taskId)
+        .update({
+          members: task.data().members.concat({
+            memberId: member.memberId,
+            googleUserId: member.googleUserId,
+            name: member.name,
+            mail: member.mail,
+            role: member.role,
+            profile: member.profile,
+            userId: member.userId,
+          }),
+        });
       res.send({
         status: 200,
         message: "Success",
