@@ -10,7 +10,7 @@ const TASKS = "tasks";
 const SUBTASKS = "subTasks";
 const COMMENT = "comment";
 const MEMBER = "members";
-const moment = require('moment');
+const moment = require("moment");
 const USERS = "users";
 
 const addTask = async (req, res, next) => {
@@ -167,8 +167,9 @@ const getTasksByUserId = async (req, res, next) => {
     }
     if (type === 0 || !type) {
       array.sort(function (a, b) {
-        console.log(a);
-        return a.timeCreated.getTime() - b.timeCreated.getTime();
+        return (
+          new Date(b.timeCreated).getTime() - new Date(a.timeCreated).getTime()
+        );
       });
     }
     res.send({
