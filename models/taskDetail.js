@@ -10,9 +10,8 @@ class TaskDetail {
     members,
     description,
     isAdmin,
-    comments,
-    subTasks,
     date,
+    admin,
   ) {
     this.id = id;
     this.name = name;
@@ -24,9 +23,8 @@ class TaskDetail {
     this.members = members;
     this.description = description;
     this.isAdmin = isAdmin;
-    this.comments = comments;
-    this.subTasks = subTasks;
     this.date = date;
+    this.admin = admin;
   }
 }
 

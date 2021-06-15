@@ -71,30 +71,36 @@ const getDetailTaskById = async (req, res, next) => {
     const id = req.query.id;
     const userId = req.query.userId;
     let task = {};
+    let data = {};
     const userData = await firestore
       .collection(TASKS)
       .where("id", "==", id)
       .get()
       .then((querySnapshot) => {
         querySnapshot.forEach((doc) => {
-          const data = doc.data();
-          task = new TaskDetail(
-            data.id,
-            data.name,
-            data.userId,
-            data.status,
-            data.timeCreated,
-            data.timeStart,
-            data.timeEnd,
-            data.members,
-            data.description,
-            userId === data.userId ? true : false,
-            data.date
-          );
+          data = doc.data();
           return doc;
         });
         return querySnapshot;
       });
+    const admin = await firestore.collection(USERS).doc(data.userId).get();
+    task = new TaskDetail(
+      data.id,
+      data.name,
+      data.userId,
+      data.status,
+      data.timeCreated,
+      data.timeStart,
+      data.timeEnd,
+      data.members,
+      data.description,
+      userId === data.userId ? true : false,//isAdmin
+      data.date,
+      {
+        name: admin.data().name,
+        email: admin.data().mail,
+      }
+    );
     res.send(task);
     if (!userData.exist) {
       res.send("Wrong taskId");
@@ -176,8 +182,7 @@ const getTasksByUserId = async (req, res, next) => {
           new Date(b.timeCreated).getTime() - new Date(a.timeCreated).getTime()
         );
       });
-    } 
-    else if (type == filterType.date) {
+    } else if (type == filterType.date) {
       array.sort((a) => new Date(a.date).getTime() - new Date().getTime());
     }
     res.send({
