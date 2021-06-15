@@ -106,6 +106,10 @@ const getDetailTaskById = async (req, res, next) => {
 
 const getTasksByUserId = async (req, res, next) => {
   try {
+    const filterType = {
+      timeCreated: 0,
+      date: 1,
+    };
     const id = req.query.id;
     const type = req.query.type;
     let array = [];
@@ -165,12 +169,16 @@ const getTasksByUserId = async (req, res, next) => {
           return querySnapshot;
         });
     }
-    if (type === 0 || !type) {
+    //Filter by type
+    if (type === filterType.timeCreated || !type) {
       array.sort(function (a, b) {
         return (
           new Date(b.timeCreated).getTime() - new Date(a.timeCreated).getTime()
         );
       });
+    } 
+    else if (type == filterType.date) {
+      array.sort((a) => new Date(a.date).getTime() - new Date().getTime());
     }
     res.send({
       message: "Success",
