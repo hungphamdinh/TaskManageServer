@@ -56,6 +56,12 @@ const getSubTaskByTaskId = async (req, res, next) => {
           array.push(subTask);
           return doc;
         });
+        array.sort(function (a, b) {
+          return (
+            new Date(b.timeCreated).getTime() -
+            new Date(a.timeCreated).getTime()
+          );
+        });
         res.send(array);
         return querySnapshot;
       }); // filerBy userId
@@ -84,21 +90,18 @@ const updateSubTask = async (req, res, next) => {
         id,
         status: status,
       });
-    }
-    else {
+    } else {
       res.send({
         status: 400,
-        message: 'Status undefined'
-      })
+        message: "Status undefined",
+      });
     }
-    if(!task.exist) {
+    if (!task.exist) {
       res.send({
         status: 400,
-        message: 'Wrong taskId'
-      })
+        message: "Wrong taskId",
+      });
     }
-
-
   } catch (error) {
     res.status(400).send(error.message);
   }

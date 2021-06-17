@@ -12,7 +12,12 @@ const COMMENT = "comment";
 const MEMBER = "members";
 const moment = require("moment");
 const USERS = "users";
-
+const status = {
+  urgent: 0,
+  running: 1,
+  onGoing: 2,
+  done: 3,
+};
 const addTask = async (req, res, next) => {
   try {
     const id = req.body.userId;
@@ -84,6 +89,7 @@ const getDetailTaskById = async (req, res, next) => {
         return querySnapshot;
       });
     const admin = await firestore.collection(USERS).doc(data.userId).get();
+    const adminData = admin.data();
     task = new TaskDetail(
       data.id,
       data.name,
@@ -92,9 +98,18 @@ const getDetailTaskById = async (req, res, next) => {
       data.timeCreated,
       data.timeStart,
       data.timeEnd,
-      data.members,
+      data.members.concat({
+        profile: adminData.profile,
+        userId: admin.id,
+        role: adminData.role,
+        googleUserId: adminData.googleUserId,
+        mail: adminData.mail,
+        name: adminData.name,
+        memberId: admin.id,
+        isActive: true,
+      }), // add admin
       data.description,
-      userId === data.userId ? true : false,//isAdmin
+      userId === data.userId ? true : false, //isAdmin
       data.date,
       {
         name: admin.data().name,
@@ -113,35 +128,30 @@ const getDetailTaskById = async (req, res, next) => {
 const getTasksByUserId = async (req, res, next) => {
   try {
     const filterType = {
-      timeCreated: 0,
-      date: 1,
+      urgent: 0,
+      running: 1,
+      onGoing: 2,
+      doneTask: 3,
+      timeCreated: 4,
+      date: 5,
     };
     const id = req.query.id;
-    const type = req.query.type;
+    const type = parseInt(req.query.type);
     let array = [];
+    let response = [];
+    //filter by userId
     const userData = await firestore
       .collection(TASKS)
       .where("userId", "==", id)
       .get()
       .then((querySnapshot) => {
         querySnapshot.forEach((doc) => {
-          const task = new Task(
-            doc.data().id,
-            doc.data().name,
-            doc.data().userId,
-            doc.data().status,
-            doc.data().timeCreated,
-            doc.data().timeStart,
-            doc.data().timeEnd,
-            doc.data().members,
-            doc.data().description,
-            doc.data().date
-          );
+          const task = getTask(doc.data());
           array.push(task);
           return doc;
         });
         return querySnapshot;
-      }); // filerBy userId
+      }); // filerBy (parentId)
     const parentUser = await firestore.collection(MEMBER).doc(id).get();
     if (parentUser.exists) {
       const userId = parentUser.data().userId;
@@ -152,43 +162,46 @@ const getTasksByUserId = async (req, res, next) => {
         .then((querySnapshot) => {
           querySnapshot.forEach((doc) => {
             doc.data().members.forEach((item) => {
+              //filter By Member id
               if (item.memberId === id) {
-                // console.log('abc');
-                const task = new Task(
-                  doc.data().id,
-                  doc.data().name,
-                  doc.data().userId,
-                  doc.data().status,
-                  doc.data().timeCreated,
-                  doc.data().timeStart,
-                  doc.data().timeEnd,
-                  doc.data().members,
-                  doc.data().description,
-                  doc.data().date
-                );
+                const task = getTask(doc.data());
                 array.push(task);
               }
             });
-
             return doc;
           });
           return querySnapshot;
         });
     }
-    //Filter by type
-    if (type === filterType.timeCreated || !type) {
-      array.sort(function (a, b) {
-        return (
-          new Date(b.timeCreated).getTime() - new Date(a.timeCreated).getTime()
-        );
-      });
-    } else if (type == filterType.date) {
-      array.sort((a) => new Date(a.date).getTime() - new Date().getTime());
+    //Filter by timeCreated
+    if (type === filterType.timeCreated || (!type && type !== 0)) {
+      response = array
+        .sort(function (a, b) {
+          return (
+            new Date(b.timeCreated).getTime() -
+            new Date(a.timeCreated).getTime()
+          );
+        })
+        .filter((item) => item.status !== status.done);
+    }
+    // filter by date close deadline
+    else if (type == filterType.date) {
+      response = array
+        .sort((a) => new Date(a.date).getTime() - new Date().getTime())
+        .filter((item) => item.status !== status.done);
+    } else if (type === filterType.doneTask) {
+      response = array.filter((item) => item.status === status.done);
+    } else if (type === filterType.onGoing) {
+      response = array.filter((item) => item.status === status.onGoing);
+    } else if (type === filterType.running) {
+      response = array.filter((item) => item.status === status.running);
+    } else {
+      response = array.filter((item) => item.status === status.urgent);
     }
     res.send({
       message: "Success",
       status: 200,
-      data: array,
+      data: response,
     });
     if (!userData.exist) {
       res.send("Wrong userId");
@@ -198,6 +211,20 @@ const getTasksByUserId = async (req, res, next) => {
   }
 };
 
+const getTask = (data) => {
+  return new Task(
+    data.id,
+    data.name,
+    data.userId,
+    data.status,
+    data.timeCreated,
+    data.timeStart,
+    data.timeEnd,
+    data.members,
+    data.description,
+    data.date
+  );
+};
 const updateTask = async (req, res, next) => {
   try {
     const id = req.body.id;
@@ -232,6 +259,36 @@ const deleteTask = async (req, res, next) => {
   }
 };
 
+const leaveTask = async (req, res, next) => {
+  try {
+    const taskId = req.body.taskId;
+    const userId = req.body.userId;
+    const task = await firestore.collection(TASKS).doc(taskId);
+    const tasKData = await task.get();
+    const data = tasKData.data();
+    const newTask = new TaskDetail(
+      data.id,
+      data.name,
+      data.userId,
+      data.status,
+      data.timeCreated,
+      data.timeStart,
+      data.timeEnd,
+      data.members.filter((item) => item.memberId != userId),
+      data.description,
+      data.isAdmin,
+      data.date,
+      data.admin
+    );
+    await task.set(JSON.parse(JSON.stringify(newTask)));
+    res.send({
+      status: 200,
+      message: "Leave task success",
+    });
+  } catch (error) {
+    res.status(400).send(error.message);
+  }
+};
 module.exports = {
   addTask,
   getAllTask,
@@ -239,4 +296,5 @@ module.exports = {
   updateTask,
   deleteTask,
   getDetailTaskById,
+  leaveTask,
 };
