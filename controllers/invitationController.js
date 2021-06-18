@@ -69,7 +69,10 @@ const getInvitationsByUserId = async (req, res, next) => {
             console.log(doc.data().status);
             if (doc.data().status == status.pending) {
               //Status pending
-              array.push(doc.data());
+              array.push({
+                ...doc.data(),
+                type: 'Receiver',
+              });
             }
             return doc;
           });
@@ -95,7 +98,10 @@ const getInvitationsByUserId = async (req, res, next) => {
         .get()
         .then((querySnapshot) => {
           querySnapshot.forEach((doc) => {
-            array.push(doc.data());
+            array.push({
+              ...doc.data(),
+              type: 'Sender',
+            });
             return doc;
           });
           res.send({
