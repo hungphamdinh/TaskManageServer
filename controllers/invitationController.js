@@ -54,8 +54,9 @@ const getInvitationsByUserId = async (req, res, next) => {
     const userType = {
       receiver: 0,
       sender: 1,
-    }
+    };
     let array = [];
+    let sender = [];
     const id = req.query.id;
     const type = req.query.type;
     if (type == userType.receiver) {
@@ -71,19 +72,19 @@ const getInvitationsByUserId = async (req, res, next) => {
               //Status pending
               array.push({
                 ...doc.data(),
-                type: 'Receiver',
+                type: "Receiver",
               });
             }
             return doc;
           });
-          res.send({
-            status: 200,
-            message: "Success",
-            type: "Receiver",
-            data: array,
-          });
           return querySnapshot;
         });
+      res.send({
+        status: 200,
+        message: "Success",
+        type: "Receiver",
+        data: array,
+      });
       if (!invitation.exists) {
         res.send({
           status: 400,
@@ -100,18 +101,18 @@ const getInvitationsByUserId = async (req, res, next) => {
           querySnapshot.forEach((doc) => {
             array.push({
               ...doc.data(),
-              type: 'Sender',
+              type: "Sender",
             });
             return doc;
           });
-          res.send({
-            status: 200,
-            message: "Success",
-            type: "Sender",
-            data: array,
-          });
           return querySnapshot;
         });
+      res.send({
+        status: 200,
+        message: "Success",
+        type: "Sender",
+        data: array,
+      });
       if (!invitation.exists) {
         res.send({
           status: 400,
