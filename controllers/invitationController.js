@@ -59,6 +59,7 @@ const getInvitationsByUserId = async (req, res, next) => {
     let sender = [];
     const id = req.query.id;
     const type = req.query.type;
+    const taskId = req.query.taskId;
     if (type == userType.receiver) {
       //0: Receiver; 1: Sender
       const invitation = await firestore
@@ -111,7 +112,7 @@ const getInvitationsByUserId = async (req, res, next) => {
         status: 200,
         message: "Success",
         type: "Sender",
-        data: array,
+        data: array.filter((item) => item.taskId === taskId),
       });
       if (!invitation.exists) {
         res.send({
