@@ -224,8 +224,8 @@ const acceptInvitation = async (req, res, next) => {
 
 const deleteInvitation = async (req, res, next) => {
   try {
-    const userId = req.params.userId;
-    const id = req.params.id;
+    const userId = req.query.userId;
+    const id = req.query.id;
     const invitation = await firestore
       .collection(INVITATION)
       .where("userId", "==", userId);
