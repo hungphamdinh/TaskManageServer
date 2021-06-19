@@ -226,11 +226,10 @@ const deleteInvitation = async (req, res, next) => {
   try {
     const userId = req.query.userId;
     const id = req.query.id;
-    const invitation = await firestore
-      .collection(INVITATION)
-      .where("userId", "==", userId);
-    if (invitation.exists) {
-      await firestore.collection(USERS).doc(id).delete();
+    const invitation = await firestore.collection(INVITATION).doc(id);
+    const data = await firestore.collection(INVITATION).doc(id).get();
+    if (data.data().userId === userId) {
+      await invitation.delete();
       res.send({
         status: 200,
         message: "Success",
@@ -242,7 +241,7 @@ const deleteInvitation = async (req, res, next) => {
       });
     }
   } catch (error) {
-    res.status(400).send(error.message);
+    res.status(400).send({ status: 400, message: error.message });
   }
 };
 
